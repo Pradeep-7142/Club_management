@@ -91,14 +91,37 @@ DATABASE_URL=postgresql://username:password@localhost:5432/the_clubs
 
 ## Running the Application
 
-### 1. Start the Backend
+### Option A: Using Docker (Recommended)
+
+Run the entire application stack (PostgreSQL + Flask Backend + React Frontend & Nginx) with a single command:
+
+```bash
+# Build and start all services
+docker compose up --build -d
+
+# View logs
+docker compose logs -f
+
+# Stop services
+docker compose down
+```
+
+* **Frontend**: `http://localhost`
+* **Backend API**: `http://localhost:5000` (or proxied via `http://localhost/api/`)
+* **PostgreSQL**: `localhost:5432`
+
+---
+
+### Option B: Running Locally without Docker
+
+#### 1. Start the Backend
 ```bash
 cd backend
 python run.py
 ```
 The API will be available at `http://localhost:5000`.
 
-### 2. Start the Frontend
+#### 2. Start the Frontend
 ```bash
 cd frontend
 npm run dev
