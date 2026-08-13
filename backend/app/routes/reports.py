@@ -2,7 +2,9 @@ from collections import defaultdict
 from datetime import datetime
 
 from flask import Blueprint, jsonify, request
+from flask_jwt_extended import jwt_required
 
+from app.decorators import role_required
 from app.models import Club, Event
 
 bp = Blueprint("reports", __name__, url_prefix="/api/reports")
@@ -24,6 +26,8 @@ MONTHS = [
 
 
 @bp.route("/yearly", methods=["GET"])
+@jwt_required()
+@role_required("admin", "club_head")
 def yearly_report():
     year = request.args.get("year", type=int)
     if not year:

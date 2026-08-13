@@ -142,6 +142,7 @@ def create_club():
 
 @bp.route("/<cid>", methods=["PUT"])
 @jwt_required()
+@role_required("admin", "club_head")
 def update_club(cid):
     from flask_jwt_extended import get_jwt_identity
     uid = get_jwt_identity()
@@ -155,36 +156,47 @@ def update_club(cid):
 
     if user.role != "admin" and (user.role != "club_head" or user.club_id != cid):
         return jsonify({"message": "Forbidden"}), 403
-    data = request.get_json(silent=True) or {}
-    if "name" in data:
-        c.name = data["name"]
-    if "description" in data:
-        c.description = data["description"] or ""
-    if "category" in data:
-        c.category = data["category"] or ""
-    if "points" in data and data["points"] is not None:
-        c.points = int(data["points"])
-    if "headId" in data or "head_id" in data:
-        hid = data.get("headId") or data.get("head_id")
-        new_head_id = _resolve_head_id(hid) or c.head_id
-        if new_head_id != c.head_id:
-            old_head = db.session.get(User, c.head_id)
-            if old_head and old_head.club_id == c.id:
-                old_head.club_id = None
-            c.head_id = new_head_id
-            new_head = db.session.get(User, new_head_id)
-            if new_head:
-                new_head.club_id = c.id
-                new_head.role = "club_head"
-            
-            if old_head:
-                # Check if this user is still a head for ANY other club
-                other_heads = Club.query.filter(Club.head_id == old_head.id, Club.id != cid).first()
-                if not other_heads and old_head.role == "club_head":
-                    old_head.role = "student"
 
-    if "logo" in data:
-        c.logo = data.get("logo")
+    data = request.get_json(silent=True) or {}
+
+    if user.role != "admin":
+        # Club heads can only update description and logo
+        if "description" in data:
+            c.description = data["description"] or ""
+        if "logo" in data:
+            c.logo = data.get("logo")
+    else:
+        # Admin can update name, description, category, points, headId, logo
+        if "name" in data:
+            c.name = data["name"]
+        if "description" in data:
+            c.description = data["description"] or ""
+        if "category" in data:
+            c.category = data["category"] or ""
+        if "points" in data and data["points"] is not None:
+            c.points = int(data["points"])
+        if "headId" in data or "head_id" in data:
+            hid = data.get("headId") or data.get("head_id")
+            new_head_id = _resolve_head_id(hid) or c.head_id
+            if new_head_id != c.head_id:
+                old_head = db.session.get(User, c.head_id)
+                if old_head and old_head.club_id == c.id:
+                    old_head.club_id = None
+                c.head_id = new_head_id
+                new_head = db.session.get(User, new_head_id)
+                if new_head:
+                    new_head.club_id = c.id
+                    new_head.role = "club_head"
+                
+                if old_head:
+                    # Check if this user is still a head for ANY other club
+                    other_heads = Club.query.filter(Club.head_id == old_head.id, Club.id != cid).first()
+                    if not other_heads and old_head.role == "club_head":
+                        old_head.role = "student"
+
+        if "logo" in data:
+            c.logo = data.get("logo")
+
     db.session.commit()
     return jsonify(club_to_dict(c)), 200
 

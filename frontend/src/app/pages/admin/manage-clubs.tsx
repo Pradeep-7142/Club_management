@@ -50,8 +50,10 @@ export default function ManageClubsPage() {
 
   useEffect(() => {
     loadClubs();
-    api.getUsers().then(setUsers);
-  }, []);
+    if (user?.role === 'admin') {
+      api.getUsers().then(setUsers);
+    }
+  }, [user]);
 
   const loadClubs = async () => {
     const allClubs = await api.getClubs();

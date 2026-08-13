@@ -28,6 +28,18 @@ def update_role(uid):
     role = data.get("role")
     if role not in ("admin", "club_head", "student"):
         return jsonify({"message": "Invalid role"}), 400
+
+    from app.models import Club
+    if role != "club_head":
+        # If demoted from club_head, clear club_id
+        user.club_id = None
+        # If they were head of any club, reassign to admin or clear
+        clubs = Club.query.filter_by(head_id=uid).all()
+        admin = User.query.filter_by(role="admin").first()
+        admin_id = admin.id if admin else ""
+        for c in clubs:
+            c.head_id = admin_id
+
     user.role = role
     db.session.commit()
     return jsonify(user_to_dict(user)), 200

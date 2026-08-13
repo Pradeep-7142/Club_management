@@ -19,6 +19,7 @@ def user_to_dict(u: User) -> dict:
 
 
 def club_to_dict(c: Club) -> dict:
+    head = db.session.get(User, c.head_id) if c.head_id else None
     return {
         "id": c.id,
         "name": c.name,
@@ -27,6 +28,8 @@ def club_to_dict(c: Club) -> dict:
         "memberCount": c.member_count if c.member_count is not None else 0,
         "points": c.points or 0,
         "headId": c.head_id,
+        "headName": head.name if head else "",
+        "headEmail": head.email if head else "",
         "createdAt": c.created_at,
         **({"logo": c.logo} if c.logo else {}),
     }

@@ -45,12 +45,6 @@ export default function ClubDetailsPage() {
       ]).then(([clubData, eventsData]) => {
         setClub(clubData || null);
         setClubEvents(eventsData.filter(e => e.clubId === id));
-        if (clubData?.headId) {
-            api.getUsers().then(users => {
-                const head = users.find(u => u.id === clubData.headId);
-                setHeadUser(head || null);
-            });
-        }
         setLoading(false);
       });
     }
@@ -261,7 +255,7 @@ export default function ClubDetailsPage() {
             <DialogTitle className="flex flex-col gap-1">
               <span>{club.name} - Members</span>
               <span className="text-sm font-normal text-muted-foreground">
-                Club Head: {headUser?.name || 'Assigned Admin'}
+                Club Head: {club.headName || 'Assigned Admin'}
               </span>
             </DialogTitle>
           </DialogHeader>

@@ -12,9 +12,13 @@ bp = Blueprint("events", __name__, url_prefix="/api/events")
 
 
 def _can_manage_event(user: User, club_id: str) -> bool:
+    if not user:
+        return False
     if user.role == "admin":
         return True
-    return user.club_id == club_id
+    if user.role == "club_head" and user.club_id == club_id:
+        return True
+    return False
 
 
 @bp.route("", methods=["GET"])
@@ -73,6 +77,7 @@ def get_event(eid):
 
 @bp.route("", methods=["POST"])
 @jwt_required()
+@role_required("admin", "club_head")
 def create_event():
     uid = get_jwt_identity()
     user = db.session.get(User, uid)
@@ -136,6 +141,7 @@ def create_event():
 
 @bp.route("/<eid>", methods=["PUT"])
 @jwt_required()
+@role_required("admin", "club_head")
 def update_event(eid):
     uid = get_jwt_identity()
     user = db.session.get(User, uid)
@@ -145,8 +151,11 @@ def update_event(eid):
     ev = db.session.get(Event, eid)
     if not ev:
         return jsonify({"message": "Not found"}), 404
-    if user.role != "admin" and user.club_id != ev.club_id:
+    if not _can_manage_event(user, ev.club_id):
         return jsonify({"message": "Forbidden"}), 403
+
+    if user.role == "club_head" and ev.status == "approved":
+        return jsonify({"message": "Approved events cannot be modified by club heads"}), 403
 
     data = request.get_json(silent=True) or {}
     for field, key in [

@@ -55,8 +55,8 @@ def create_app(config_class=Config):
 
     with app.app_context():
         db.create_all()
-        from app.seed import seed_if_empty
-
-        seed_if_empty()
+        if not app.config.get("TESTING"):
+            from app.seed import seed_if_empty
+            seed_if_empty()
 
     return app

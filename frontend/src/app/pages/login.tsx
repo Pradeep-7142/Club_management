@@ -127,7 +127,43 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm">
+          {/* Quick Demo Credentials */}
+          <div className="mt-6 rounded-lg border border-border/60 bg-muted/40 p-3 text-xs">
+            <p className="mb-2 font-medium text-muted-foreground text-center">
+              Quick Demo Logins (Password: <code className="font-mono text-foreground font-semibold">password</code>):
+            </p>
+            <div className="grid grid-cols-3 gap-1.5">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-[11px] h-7 px-1"
+                onClick={() => setFormData({ email: 'admin@university.edu', password: 'password' })}
+              >
+                Admin
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-[11px] h-7 px-1"
+                onClick={() => setFormData({ email: 'head@university.edu', password: 'password' })}
+              >
+                Club Head
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="text-[11px] h-7 px-1"
+                onClick={() => setFormData({ email: 'student@university.edu', password: 'password' })}
+              >
+                Student
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-4 text-center text-sm">
             Don't have an account?{' '}
             <Button variant="link" asChild className="px-1">
               <Link to="/signup">Sign up</Link>

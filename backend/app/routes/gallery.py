@@ -56,6 +56,8 @@ def list_gallery():
         event_ids = [
             e.id for e in Event.query.filter_by(club_id=club_id).all()
         ]
+        if not event_ids:
+            return jsonify([]), 200
         rows = (
             GalleryImage.query
             .filter(GalleryImage.event_id.in_(event_ids))
@@ -72,6 +74,8 @@ def list_gallery():
         event_ids = [
             e.id for e in Event.query.filter(Event.club_id.in_(club_ids)).all()
         ]
+        if not event_ids:
+            return jsonify([]), 200
         rows = (
             GalleryImage.query
             .filter(GalleryImage.event_id.in_(event_ids))

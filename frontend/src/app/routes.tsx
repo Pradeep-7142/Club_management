@@ -2,6 +2,7 @@
 
 import { createBrowserRouter } from 'react-router';
 import { MainLayout } from './components/layout/main-layout';
+import { ProtectedRoute } from './components/auth/protected-route';
 
 // Public pages
 import Home from './pages/home';
@@ -22,9 +23,7 @@ import MyEventsPage from './pages/my-events';
 import MyClubsPage from './pages/memberships';
 import EditEventPage from './pages/edit-event';
 
-
-
-// Admin pages
+// Admin & Management pages
 import AdminDashboardPage from './pages/admin/admin-dashboard';
 import EventApprovalPage from './pages/admin/event-approval';
 import ManageClubsPage from './pages/admin/manage-clubs';
@@ -58,21 +57,104 @@ export const router = createBrowserRouter([
       { path: 'signup', Component: SignupPage },
 
       // Authenticated user routes
-      { path: 'dashboard', Component: DashboardPage },
-      { path: 'notifications', Component: NotificationsPage },
-      { path: 'memberships', Component: MyClubsPage },
-      { path: 'my-clubs', Component: MyClubsPage },
-      { path: 'create-event', Component: CreateEventPage },
-      { path: 'my-events', Component: MyEventsPage },
-      { path: 'edit-event/:id', Component: EditEventPage },
+      {
+        path: 'dashboard',
+        element: (
+          <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'notifications',
+        element: (
+          <ProtectedRoute>
+            <NotificationsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'memberships',
+        element: (
+          <ProtectedRoute>
+            <MyClubsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'my-clubs',
+        element: (
+          <ProtectedRoute>
+            <MyClubsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'create-event',
+        element: (
+          <ProtectedRoute allowedRoles={['admin', 'club_head']}>
+            <CreateEventPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'my-events',
+        element: (
+          <ProtectedRoute allowedRoles={['admin', 'club_head']}>
+            <MyEventsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'edit-event/:id',
+        element: (
+          <ProtectedRoute allowedRoles={['admin', 'club_head']}>
+            <EditEventPage />
+          </ProtectedRoute>
+        ),
+      },
 
-
-      // Admin routes
-      { path: 'admin/dashboard', Component: AdminDashboardPage },
-      { path: 'admin/event-approval', Component: EventApprovalPage },
-      { path: 'admin/manage-clubs', Component: ManageClubsPage },
-      { path: 'admin/manage-users', Component: ManageUsersPage },
-      { path: 'admin/reports', Component: ReportsPage },
+      // Admin & Management routes
+      {
+        path: 'admin/dashboard',
+        element: (
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'admin/event-approval',
+        element: (
+          <ProtectedRoute allowedRoles={['admin']}>
+            <EventApprovalPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'admin/manage-clubs',
+        element: (
+          <ProtectedRoute allowedRoles={['admin', 'club_head']}>
+            <ManageClubsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'admin/manage-users',
+        element: (
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ManageUsersPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'admin/reports',
+        element: (
+          <ProtectedRoute allowedRoles={['admin', 'club_head']}>
+            <ReportsPage />
+          </ProtectedRoute>
+        ),
+      },
 
       // 404
       { path: '*', Component: NotFound },
