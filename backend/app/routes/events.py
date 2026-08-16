@@ -5,7 +5,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_req
 
 from app.decorators import role_required
 from app.extensions import db
-from app.models import Club, ClubMember, Event, Notification, User, utcnow
+from app.models import ClubMember, Event, User
 from app.serializers import event_to_dict
 
 bp = Blueprint("events", __name__, url_prefix="/api/events")
@@ -27,7 +27,7 @@ def list_events():
     Role-specific event display:
     - admin: all events
     - club_head: only their club's events
-    - student: all events from clubs in which the student is enrolled
+    - student: all events from clubs in which the student is enrolled + approved events
     - guest: approved events only (fallback)
     """
     uid = None
@@ -54,7 +54,6 @@ def list_events():
     elif user.role == "student":
         memberships = ClubMember.query.filter_by(user_id=uid).all()
         club_ids = [m.club_id for m in memberships]
-        # Students see all approved events OR any events from clubs they've joined
         events = Event.query.filter(
             db.or_(
                 Event.status == "approved",
@@ -113,28 +112,6 @@ def create_event():
         attendance_count=data.get("attendanceCount"),
     )
     db.session.add(ev)
-
-    if event_status == "pending":
-        n = Notification(
-            id=f"notif-{uuid.uuid4().hex[:12]}",
-            type="event_approval",
-            title="Event Approval Request",
-            message=f"New event '{title}' submitted for approval.",
-            club_id=club_id,
-            created_at=utcnow().isoformat(),
-        )
-        db.session.add(n)
-    elif event_status == "approved" and user.role == "admin":
-        n = Notification(
-            id=f"notif-{uuid.uuid4().hex[:12]}",
-            type="announcement",
-            title=f"New Event: {title}",
-            message=f"An admin has scheduled a new event: '{title}'.",
-            club_id=club_id,
-            created_at=utcnow().isoformat(),
-        )
-        db.session.add(n)
-
     db.session.commit()
     return jsonify(event_to_dict(ev)), 201
 
@@ -168,17 +145,7 @@ def update_event(eid):
         if key in data:
             setattr(ev, field, data[key] or "")
     if "status" in data and user.role == "admin":
-        if ev.status != data["status"]:
-            ev.status = data["status"]
-            n = Notification(
-                id=f"notif-{uuid.uuid4().hex[:12]}",
-                type="event_approval" if ev.status == "rejected" else "announcement",
-                title="Event Status Changed",
-                message=f"The event '{ev.title}' is now {ev.status}.",
-                club_id=ev.club_id,
-                created_at=utcnow().isoformat(),
-            )
-            db.session.add(n)
+        ev.status = data["status"]
 
     if "attendanceCount" in data:
         ev.attendance_count = data["attendanceCount"]
@@ -200,24 +167,6 @@ def delete_event(eid):
     if not _can_manage_event(user, ev.club_id):
         return jsonify({"message": "Forbidden"}), 403
 
-    # Send Notification to club head and enrolled students before deleting
-    club = db.session.get(Club, ev.club_id)
-    club_name = club.name if club else "Unknown Club"
-
-    notif_id = f"notif-{uuid.uuid4().hex[:12]}"
-    n = Notification(
-        id=notif_id,
-        type="announcement",
-        title=f"Event Cancelled: {ev.title}",
-        message=f"The event '{ev.title}' from {club_name} has been cancelled by {user.role}.",
-        club_id=ev.club_id,
-        created_at=utcnow().isoformat(),
-    )
-    db.session.add(n)
-
-    from app.models import GalleryImage
-    GalleryImage.query.filter_by(event_id=ev.id).delete(synchronize_session=False)
-
     db.session.delete(ev)
     db.session.commit()
     return "", 204
@@ -231,27 +180,6 @@ def approve_event(eid):
     if not ev:
         return jsonify({"message": "Not found"}), 404
     ev.status = "approved"
-
-    n_head = Notification(
-        id=f"notif-{uuid.uuid4().hex[:12]}",
-        type="event_approval",
-        title="Event Approved",
-        message=f"Your event '{ev.title}' has been approved.",
-        club_id=ev.club_id,
-        created_at=utcnow().isoformat(),
-    )
-    db.session.add(n_head)
-
-    n_students = Notification(
-        id=f"notif-{uuid.uuid4().hex[:12]}",
-        type="announcement",
-        title=f"New Event: {ev.title}",
-        message=f"A new event '{ev.title}' has been scheduled.",
-        club_id=ev.club_id,
-        created_at=utcnow().isoformat(),
-    )
-    db.session.add(n_students)
-
     db.session.commit()
     return jsonify(event_to_dict(ev)), 200
 
@@ -264,16 +192,5 @@ def reject_event(eid):
     if not ev:
         return jsonify({"message": "Not found"}), 404
     ev.status = "rejected"
-
-    n = Notification(
-        id=f"notif-{uuid.uuid4().hex[:12]}",
-        type="event_approval",
-        title="Event Rejected",
-        message=f"Your event '{ev.title}' has been rejected.",
-        club_id=ev.club_id,
-        created_at=utcnow().isoformat(),
-    )
-    db.session.add(n)
-
     db.session.commit()
     return jsonify(event_to_dict(ev)), 200

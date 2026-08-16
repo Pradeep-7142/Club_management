@@ -1,13 +1,10 @@
 import os
 import bcrypt
-from datetime import datetime, timezone
 from app.extensions import db
 from app.models import (
     Club,
     ClubMember,
     Event,
-    GalleryImage,
-    Notification,
     User,
 )
 
@@ -17,16 +14,14 @@ def _hash(pw: str) -> str:
 
 
 def seed_database(force: bool = False):
-    """Seed comprehensive realistic data for all platform features."""
+    """Seed realistic core data for clubs, users, memberships, and events."""
     if not force and User.query.first():
         return
 
     # Clear existing records if force seeding
     if force:
-        db.session.query(GalleryImage).delete()
         db.session.query(Event).delete()
         db.session.query(ClubMember).delete()
-        db.session.query(Notification).delete()
         db.session.query(Club).delete()
         db.session.query(User).delete()
         db.session.commit()
@@ -72,8 +67,7 @@ def seed_database(force: bool = False):
             name="Tech Innovators Club",
             description="Empowering students through cutting-edge hackathons, software architecture workshops, AI labs, and open-source collaboration.",
             category="Technology",
-            member_count=42,
-            points=380,
+            member_count=4,
             head_id="head-1",
             logo="https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&auto=format&fit=crop&q=80",
             created_at="2026-01-10",
@@ -83,8 +77,7 @@ def seed_database(force: bool = False):
             name="Creative Arts & Media",
             description="A vibrant collective for graphic designers, digital painters, photographers, 3D sculptors, and creative visual storytellers.",
             category="Arts",
-            member_count=35,
-            points=290,
+            member_count=3,
             head_id="head-arts",
             logo="https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=500&auto=format&fit=crop&q=80",
             created_at="2026-01-15",
@@ -94,8 +87,7 @@ def seed_database(force: bool = False):
             name="Robotics & AI Society",
             description="Designing autonomous rovers, competitive combat bots, edge AI systems, and aerial drone avionics.",
             category="Engineering",
-            member_count=48,
-            points=420,
+            member_count=3,
             head_id="head-robotics",
             logo="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=500&auto=format&fit=crop&q=80",
             created_at="2026-01-12",
@@ -105,8 +97,7 @@ def seed_database(force: bool = False):
             name="Campus Athletics & Esports",
             description="Fostering teamwork, physical fitness, intra-university leagues, and competitive collegiate esports tournaments.",
             category="Sports",
-            member_count=56,
-            points=310,
+            member_count=3,
             head_id="head-sports",
             logo="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500&auto=format&fit=crop&q=80",
             created_at="2026-01-20",
@@ -116,8 +107,7 @@ def seed_database(force: bool = False):
             name="Harmonix Music Society",
             description="Uniting campus vocalists, instrumentalists, audio engineers, and electronic producers for live stage performances and studio jamming.",
             category="Cultural",
-            member_count=29,
-            points=240,
+            member_count=3,
             head_id="head-music",
             logo="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=500&auto=format&fit=crop&q=80",
             created_at="2026-02-01",
@@ -127,8 +117,7 @@ def seed_database(force: bool = False):
             name="Green Campus & Sustainability",
             description="Leading zero-waste campus initiatives, solar energy workshops, botanical gardens, and community environmental impact projects.",
             category="Social",
-            member_count=24,
-            points=190,
+            member_count=1,
             head_id="head-1",
             logo="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=500&auto=format&fit=crop&q=80",
             created_at="2026-02-10",
@@ -304,106 +293,9 @@ def seed_database(force: bool = False):
         ),
     ]
     db.session.add_all(events)
-    db.session.flush()
-
-    # 5. GALLERY IMAGES
-    gallery = [
-        GalleryImage(
-            id="img-1",
-            event_id="event-hackathon",
-            url="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80",
-            uploaded_at="2026-04-10T10:00:00",
-        ),
-        GalleryImage(
-            id="img-2",
-            event_id="event-hackathon",
-            url="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80",
-            uploaded_at="2026-04-10T11:30:00",
-        ),
-        GalleryImage(
-            id="img-3",
-            event_id="event-art-expo",
-            url="https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=800&auto=format&fit=crop&q=80",
-            uploaded_at="2026-04-12T14:00:00",
-        ),
-        GalleryImage(
-            id="img-4",
-            event_id="event-art-expo",
-            url="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=800&auto=format&fit=crop&q=80",
-            uploaded_at="2026-04-12T16:00:00",
-        ),
-        GalleryImage(
-            id="img-5",
-            event_id="event-robotics-showcase",
-            url="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop&q=80",
-            uploaded_at="2026-04-14T09:00:00",
-        ),
-        GalleryImage(
-            id="img-6",
-            event_id="event-esports",
-            url="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80",
-            uploaded_at="2026-04-15T18:00:00",
-        ),
-        GalleryImage(
-            id="img-7",
-            event_id="event-sunset-jam",
-            url="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80",
-            uploaded_at="2026-04-16T20:00:00",
-        ),
-        GalleryImage(
-            id="img-8",
-            event_id="event-past-ai",
-            url="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80",
-            uploaded_at="2026-03-13T12:00:00",
-        ),
-        GalleryImage(
-            id="img-9",
-            event_id="event-past-photo",
-            url="https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800&auto=format&fit=crop&q=80",
-            uploaded_at="2026-03-26T17:00:00",
-        ),
-    ]
-    db.session.add_all(gallery)
-
-    # 6. NOTIFICATIONS
-    notifications = [
-        Notification(
-            id="notif-1",
-            type="announcement",
-            title="🎉 Welcome to Spring 2026 Campus Club Fest!",
-            message="Discover student clubs, register for upcoming hackathons, art galleries, and sports leagues all across campus.",
-            created_at="2026-04-01T09:00:00",
-        ),
-        Notification(
-            id="notif-2",
-            type="event_approval",
-            title="Event Pending Approval: Cloud Native Bootcamp",
-            message="Tech Innovators Club submitted 'Cloud Native Architecture & Kubernetes Bootcamp' for Dean/Admin review.",
-            club_id="club-tech",
-            created_at="2026-04-15T11:00:00",
-        ),
-        Notification(
-            id="notif-3",
-            type="event_approval",
-            title="Event Pending Approval: VR Storytelling",
-            message="Creative Arts & Media submitted 'Spatial Audio & Virtual Reality Cinema Experience' for approval.",
-            club_id="club-arts",
-            created_at="2026-04-16T14:30:00",
-        ),
-        Notification(
-            id="notif-4",
-            type="announcement",
-            title="🏆 Robotics Club reaches 400+ Leadership Points!",
-            message="Congratulations to the Robotics & AI Society for their outstanding community achievements this semester.",
-            created_at="2026-04-18T16:00:00",
-        ),
-    ]
-    db.session.add_all(notifications)
-
     db.session.commit()
-    print("Successfully seeded database with comprehensive dummy data.")
+    print("Successfully seeded database with core dummy data.")
 
 
 def seed_if_empty():
     seed_database(force=False)
-

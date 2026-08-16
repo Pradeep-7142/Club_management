@@ -3,7 +3,7 @@
 import { Link } from 'react-router';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { ArrowRight, Users, Calendar, Trophy } from 'lucide-react';
+import { ArrowRight, Users, Calendar, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import { Club, Event } from '../lib/types';
@@ -32,11 +32,11 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col items-center gap-8 lg:flex-row">
             <div className="flex-1 space-y-6 text-center lg:text-left">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl">
-                Welcome to Student Club Management
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+                Student Club Management Platform
               </h1>
               <p className="text-lg md:text-xl text-white/90">
-                Discover, join, and engage with student clubs and activities on campus.
+                Discover, join, and engage with student clubs and campus activities.
                 Build connections, develop skills, and create lasting memories.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row lg:justify-start justify-center">
@@ -65,16 +65,16 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <h2 className="mb-12 text-center">Why Join Our Platform?</h2>
+          <h2 className="mb-12 text-center text-3xl font-bold">Why Join Our Platform?</h2>
           <div className="grid gap-8 md:grid-cols-3">
             <Card>
               <CardHeader>
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Users className="h-6 w-6" />
                 </div>
-                <CardTitle>Join Clubs</CardTitle>
+                <CardTitle>Join Student Clubs</CardTitle>
                 <CardDescription>
-                  Connect with like-minded students and be part of vibrant communities
+                  Connect with like-minded students and be part of vibrant campus communities.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -84,9 +84,9 @@ export default function Home() {
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                   <Calendar className="h-6 w-6" />
                 </div>
-                <CardTitle>Attend Events</CardTitle>
+                <CardTitle>Attend Campus Events</CardTitle>
                 <CardDescription>
-                  Participate in exciting events, workshops, and competitions throughout the year
+                  Participate in exciting workshops, hackathons, and gatherings throughout the academic year.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -94,11 +94,11 @@ export default function Home() {
             <Card>
               <CardHeader>
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Trophy className="h-6 w-6" />
+                  <Sparkles className="h-6 w-6" />
                 </div>
-                <CardTitle>Earn Recognition</CardTitle>
+                <CardTitle>Lead & Organize</CardTitle>
                 <CardDescription>
-                  Gain points for your club and climb the leaderboard to achieve top rankings
+                  Club heads can propose events, manage rosters, and streamline official approvals effortlessly.
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -110,15 +110,15 @@ export default function Home() {
       <section className="bg-muted/50 py-16">
         <div className="container mx-auto px-4">
           <div className="mb-8 flex items-center justify-between">
-            <h2>Featured Clubs</h2>
+            <h2 className="text-2xl font-bold">Featured Clubs</h2>
             <Button variant="outline" asChild>
               <Link to="/clubs">View All Clubs</Link>
             </Button>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {featuredClubs.map(club => (
-              <Card key={club.id} className="h-full hover:shadow-lg transition-shadow">
-                <CardHeader className="flex-1">
+              <Card key={club.id} className="h-full hover:shadow-lg transition-shadow flex flex-col justify-between">
+                <CardHeader>
                   <div className="mb-2 flex items-center justify-between">
                     <Badge variant="secondary">{club.category}</Badge>
                     <span className="text-sm text-muted-foreground">
@@ -145,22 +145,22 @@ export default function Home() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="mb-8 flex items-center justify-between">
-            <h2>Upcoming Events</h2>
+            <h2 className="text-2xl font-bold">Upcoming Events</h2>
             <Button variant="outline" asChild>
               <Link to="/events">View All Events</Link>
             </Button>
           </div>
           <div className="grid gap-6 md:grid-cols-3">
             {upcomingEvents.map(event => (
-              <Card key={event.id} className="h-full hover:shadow-lg transition-shadow">
-                <CardHeader className="flex-1">
+              <Card key={event.id} className="h-full hover:shadow-lg transition-shadow flex flex-col justify-between">
+                <CardHeader>
                   <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
                     <span>{new Date(event.date).toLocaleDateString()}</span>
                     <span>{event.time}</span>
                   </div>
                   <CardTitle>{event.title}</CardTitle>
                   <CardDescription>
-                    <span className="text-primary">{event.clubName}</span>
+                    <span className="text-primary font-medium">{event.clubName}</span>
                   </CardDescription>
                   <CardDescription className="line-clamp-2 mt-2">
                     {event.description}
@@ -180,9 +180,9 @@ export default function Home() {
       {/* Call to Action */}
       <section className="bg-primary py-16 text-white">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="mb-4 text-white">Ready to Get Started?</h2>
-          <p className="mb-8 text-lg text-white/90">
-            Join our community today and start your journey with student clubs
+          <h2 className="mb-4 text-white text-3xl font-bold">Ready to Get Started?</h2>
+          <p className="mb-8 text-lg text-white/90 max-w-xl mx-auto">
+            Join our university club network today and connect with campus communities.
           </p>
           <Button size="lg" variant="secondary" asChild>
             <Link to="/signup">Sign Up Now</Link>

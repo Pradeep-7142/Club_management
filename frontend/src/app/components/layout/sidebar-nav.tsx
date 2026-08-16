@@ -5,13 +5,8 @@ import {
   LayoutDashboard,
   Users,
   Calendar,
-  Image,
-  Trophy,
-  Bell,
-  Settings,
   UserCog,
   CheckSquare,
-  BarChart3,
   Plus,
   List,
 } from 'lucide-react';
@@ -34,14 +29,9 @@ export function SidebarNav({ onLinkClick }: SidebarNavProps) {
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/clubs', label: 'Clubs', icon: Users },
     { path: '/memberships', label: 'My Clubs', icon: List },
-
     { path: '/events', label: 'Events', icon: Calendar },
     { path: '/calendar', label: 'Calendar', icon: Calendar },
-    { path: '/gallery', label: 'Gallery', icon: Image },
-    { path: '/leaderboard', label: 'Leaderboard', icon: Trophy },
-    { path: '/notifications', label: 'Notifications', icon: Bell },
   ];
-
 
   const clubHeadItems = [
     { path: '/my-events', label: 'My Events', icon: List },
@@ -53,7 +43,6 @@ export function SidebarNav({ onLinkClick }: SidebarNavProps) {
     { path: '/admin/event-approval', label: 'Event Approval', icon: CheckSquare },
     { path: '/admin/manage-clubs', label: 'Manage Clubs', icon: Users },
     { path: '/admin/manage-users', label: 'Manage Users', icon: UserCog },
-    { path: '/admin/reports', label: 'Reports', icon: BarChart3 },
   ];
 
   return (
@@ -113,7 +102,7 @@ export function SidebarNav({ onLinkClick }: SidebarNavProps) {
           </div>
         )}
 
-        {/* Common Navigation - shown after role-specific sections */}
+        {/* Common Navigation */}
         <div className="space-y-1 pt-2">
           {navItems.map(item => (
             <Link

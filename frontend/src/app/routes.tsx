@@ -10,14 +10,11 @@ import ClubsPage from './pages/clubs';
 import ClubDetailsPage from './pages/club-details';
 import EventsPage from './pages/events';
 import CalendarPage from './pages/calendar';
-import GalleryPage from './pages/gallery';
-import LeaderboardPage from './pages/leaderboard';
 import LoginPage from './pages/login';
 import SignupPage from './pages/signup';
 
 // Authenticated user pages
 import DashboardPage from './pages/dashboard';
-import NotificationsPage from './pages/notifications';
 import CreateEventPage from './pages/create-event';
 import MyEventsPage from './pages/my-events';
 import MyClubsPage from './pages/memberships';
@@ -28,7 +25,6 @@ import AdminDashboardPage from './pages/admin/admin-dashboard';
 import EventApprovalPage from './pages/admin/event-approval';
 import ManageClubsPage from './pages/admin/manage-clubs';
 import ManageUsersPage from './pages/admin/manage-users';
-import ReportsPage from './pages/admin/reports';
 
 // 404 Page
 function NotFound() {
@@ -51,8 +47,6 @@ export const router = createBrowserRouter([
       { path: 'clubs/:id', Component: ClubDetailsPage },
       { path: 'events', Component: EventsPage },
       { path: 'calendar', Component: CalendarPage },
-      { path: 'gallery', Component: GalleryPage },
-      { path: 'leaderboard', Component: LeaderboardPage },
       { path: 'login', Component: LoginPage },
       { path: 'signup', Component: SignupPage },
 
@@ -62,14 +56,6 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <DashboardPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'notifications',
-        element: (
-          <ProtectedRoute>
-            <NotificationsPage />
           </ProtectedRoute>
         ),
       },
@@ -144,14 +130,6 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={['admin']}>
             <ManageUsersPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/reports',
-        element: (
-          <ProtectedRoute allowedRoles={['admin', 'club_head']}>
-            <ReportsPage />
           </ProtectedRoute>
         ),
       },

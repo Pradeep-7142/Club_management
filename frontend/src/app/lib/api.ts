@@ -1,6 +1,6 @@
 // API client for Student Club Management System (Flask backend)
 
-import { Club, Event, GalleryImage, Notification, User } from './types';
+import { Club, Event, User } from './types';
 
 const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '');
 
@@ -64,6 +64,7 @@ async function request<T>(
 }
 
 export const api = {
+  // Auth
   async login(email: string, password: string): Promise<{ user: User; token: string }> {
     const data = await request<{ user: User; token: string }>('/auth/login', {
       method: 'POST',
@@ -87,6 +88,7 @@ export const api = {
     return { user: data.user };
   },
 
+  // Clubs
   async getClubs(): Promise<Club[]> {
     return request<Club[]>('/clubs', { method: 'GET' });
   },
@@ -108,7 +110,6 @@ export const api = {
   },
 
   async createClub(clubData: Partial<Club>): Promise<Club> {
-
     return request<Club>('/clubs', {
       method: 'POST',
       json: {
@@ -128,7 +129,6 @@ export const api = {
         name: clubData.name,
         description: clubData.description,
         category: clubData.category,
-        points: clubData.points,
         headId: clubData.headId,
         logo: clubData.logo,
       },
@@ -143,6 +143,7 @@ export const api = {
     return request<User[]>(`/clubs/${encodeURIComponent(id)}/members`, { method: 'GET' });
   },
 
+  // Events
   async getEvents(): Promise<Event[]> {
     return request<Event[]>('/events', { method: 'GET' });
   },
@@ -202,53 +203,7 @@ export const api = {
     await request<void>(`/events/${encodeURIComponent(id)}`, { method: 'DELETE' });
   },
 
-  async getNotifications(): Promise<Notification[]> {
-
-    return request<Notification[]>('/notifications', { method: 'GET' });
-  },
-
-  async markNotificationRead(id: string): Promise<void> {
-    await request<void>(`/notifications/${encodeURIComponent(id)}/read`, {
-      method: 'PUT',
-    });
-  },
-
-  async deleteNotifications(ids: string[] | 'all'): Promise<void> {
-    await request<void>('/notifications/delete', {
-      method: 'DELETE',
-      json: { ids },
-    });
-  },
-
-  async getGalleryImages(): Promise<GalleryImage[]> {
-    return request<GalleryImage[]>('/gallery', { method: 'GET' });
-  },
-
-  async uploadGalleryImage(eventId: string, imageFile: File): Promise<GalleryImage> {
-    const token = getToken();
-    const fd = new FormData();
-    fd.append('file', imageFile);
-    fd.append('eventId', eventId);
-    const headers: Record<string, string> = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    const res = await fetch(`${API_BASE}/api/gallery/upload`, {
-      method: 'POST',
-      headers,
-      body: fd,
-    });
-    const data = await parseJson<GalleryImage & { message?: string }>(res);
-    if (!res.ok) {
-      throw new Error((data && (data as { message?: string }).message) || res.statusText);
-    }
-    return data as GalleryImage;
-  },
-
-  async deleteGalleryImage(id: string): Promise<void> {
-    await request<void>(`/gallery/${encodeURIComponent(id)}`, { method: 'DELETE' });
-  },
-
+  // Users
   async getUsers(): Promise<User[]> {
     return request<User[]>('/users', { method: 'GET' });
   },
@@ -257,12 +212,6 @@ export const api = {
     return request<User>(`/users/${encodeURIComponent(userId)}/role`, {
       method: 'PUT',
       json: { role },
-    });
-  },
-
-  async getYearlyReport(year: number): Promise<unknown> {
-    return request(`/reports/yearly?year=${encodeURIComponent(String(year))}`, {
-      method: 'GET',
     });
   },
 };

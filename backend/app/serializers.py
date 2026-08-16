@@ -1,5 +1,5 @@
 from app.extensions import db
-from app.models import Club, Event, GalleryImage, Notification, User
+from app.models import Club, Event, User
 
 
 def user_to_dict(u: User) -> dict:
@@ -17,7 +17,6 @@ def user_to_dict(u: User) -> dict:
     return d
 
 
-
 def club_to_dict(c: Club) -> dict:
     head = db.session.get(User, c.head_id) if c.head_id else None
     return {
@@ -26,7 +25,6 @@ def club_to_dict(c: Club) -> dict:
         "description": c.description or "",
         "category": c.category or "",
         "memberCount": c.member_count if c.member_count is not None else 0,
-        "points": c.points or 0,
         "headId": c.head_id,
         "headName": head.name if head else "",
         "headEmail": head.email if head else "",
@@ -53,31 +51,3 @@ def event_to_dict(e: Event) -> dict:
     if e.attendance_count is not None:
         d["attendanceCount"] = e.attendance_count
     return d
-
-
-def notification_to_dict(n: Notification, read: bool) -> dict:
-    return {
-        "id": n.id,
-        "type": n.type,
-        "title": n.title,
-        "message": n.message,
-        "read": read,
-        "createdAt": n.created_at,
-    }
-
-
-def gallery_to_dict(g: GalleryImage) -> dict:
-    ev = db.session.get(Event, g.event_id)
-    event_name = ev.title if ev else ""
-    club = db.session.get(Club, ev.club_id) if ev else None
-    club_id = ev.club_id if ev else ""
-    club_name = club.name if club else ""
-    return {
-        "id": g.id,
-        "eventId": g.event_id,
-        "eventName": event_name,
-        "clubId": club_id,
-        "clubName": club_name,
-        "url": g.url,
-        "uploadedAt": g.uploaded_at,
-    }

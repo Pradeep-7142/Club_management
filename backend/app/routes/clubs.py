@@ -29,7 +29,6 @@ def list_clubs():
 @jwt_required()
 def list_my_clubs():
     from flask_jwt_extended import get_jwt_identity
-    from app.models import ClubMember
     uid = get_jwt_identity()
     memberships = ClubMember.query.filter_by(user_id=uid).all()
     club_ids = [m.club_id for m in memberships]
@@ -41,7 +40,6 @@ def list_my_clubs():
 @jwt_required()
 def join_club(cid):
     from flask_jwt_extended import get_jwt_identity
-    from app.models import ClubMember
     uid = get_jwt_identity()
     user = db.session.get(User, uid)
     if not user:
@@ -60,7 +58,6 @@ def join_club(cid):
     db.session.commit()
     
     return jsonify({"message": "Joined successfully"}), 200
-
 
 
 @bp.route("/<cid>", methods=["GET"])
@@ -123,7 +120,6 @@ def create_club():
         name=name,
         description=data.get("description") or "",
         category=data.get("category") or "",
-        points=0,
         member_count=0,
         head_id=head_id,
         created_at=today,
@@ -166,15 +162,13 @@ def update_club(cid):
         if "logo" in data:
             c.logo = data.get("logo")
     else:
-        # Admin can update name, description, category, points, headId, logo
+        # Admin can update name, description, category, headId, logo
         if "name" in data:
             c.name = data["name"]
         if "description" in data:
             c.description = data["description"] or ""
         if "category" in data:
             c.category = data["category"] or ""
-        if "points" in data and data["points"] is not None:
-            c.points = int(data["points"])
         if "headId" in data or "head_id" in data:
             hid = data.get("headId") or data.get("head_id")
             new_head_id = _resolve_head_id(hid) or c.head_id
@@ -189,7 +183,6 @@ def update_club(cid):
                     new_head.role = "club_head"
                 
                 if old_head:
-                    # Check if this user is still a head for ANY other club
                     other_heads = Club.query.filter(Club.head_id == old_head.id, Club.id != cid).first()
                     if not other_heads and old_head.role == "club_head":
                         old_head.role = "student"
@@ -205,7 +198,7 @@ def update_club(cid):
 @jwt_required()
 @role_required("admin")
 def delete_club(cid):
-    from app.models import ClubMember, Event, GalleryImage, User
+    from app.models import ClubMember, Event, User
 
     c = db.session.get(Club, cid)
     if not c:
@@ -213,17 +206,7 @@ def delete_club(cid):
 
     ClubMember.query.filter_by(club_id=cid).delete(synchronize_session=False)
     User.query.filter_by(club_id=cid).update({"club_id": None}, synchronize_session=False)
-    
-    for ev in Event.query.filter_by(club_id=cid).all():
-        GalleryImage.query.filter_by(event_id=ev.id).delete(synchronize_session=False)
     Event.query.filter_by(club_id=cid).delete(synchronize_session=False)
-
-    from app.models import Notification, NotificationRead
-    notifs = Notification.query.filter_by(club_id=cid).all()
-    if notifs:
-        n_ids = [n.id for n in notifs]
-        NotificationRead.query.filter(NotificationRead.notification_id.in_(n_ids)).delete(synchronize_session=False)
-        Notification.query.filter_by(club_id=cid).delete(synchronize_session=False)
 
     db.session.delete(c)
     db.session.commit()

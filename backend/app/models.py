@@ -34,7 +34,6 @@ class Club(db.Model):
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, default="")
     category = db.Column(db.String(128), default="")
-    points = db.Column(db.Integer, default=0)
     member_count = db.Column(db.Integer, default=0)
     logo = db.Column(db.String(512), nullable=True)
     head_id = db.Column(db.String(64), db.ForeignKey("user.id"), nullable=False)
@@ -70,43 +69,3 @@ class Event(db.Model):
     status = db.Column(db.String(32), nullable=False)  # pending | approved | rejected
     created_by = db.Column(db.String(64), db.ForeignKey("user.id"), nullable=False)
     attendance_count = db.Column(db.Integer, nullable=True)
-
-
-class Notification(db.Model):
-    __tablename__ = "notification"
-
-    id = db.Column(db.String(64), primary_key=True)
-    type = db.Column(db.String(64), nullable=False)
-    title = db.Column(db.String(255), nullable=False)
-    message = db.Column(db.Text, nullable=False)
-    club_id = db.Column(db.String(64), db.ForeignKey("club.id"), nullable=True) # Targeting!
-    created_at = db.Column(db.String(64), nullable=False)
-
-
-
-class NotificationRead(db.Model):
-    __tablename__ = "notification_read"
-
-    user_id = db.Column(db.String(64), db.ForeignKey("user.id"), primary_key=True)
-    notification_id = db.Column(
-        db.String(64), db.ForeignKey("notification.id"), primary_key=True
-    )
-    read = db.Column(db.Boolean, default=False)
-
-
-class NotificationDeleted(db.Model):
-    __tablename__ = "notification_deleted"
-
-    user_id = db.Column(db.String(64), db.ForeignKey("user.id"), primary_key=True)
-    notification_id = db.Column(
-        db.String(64), db.ForeignKey("notification.id"), primary_key=True
-    )
-
-
-class GalleryImage(db.Model):
-    __tablename__ = "gallery_image"
-
-    id = db.Column(db.String(64), primary_key=True)
-    event_id = db.Column(db.String(64), db.ForeignKey("event.id"), nullable=False)
-    url = db.Column(db.String(1024), nullable=False)
-    uploaded_at = db.Column(db.String(64), nullable=False)

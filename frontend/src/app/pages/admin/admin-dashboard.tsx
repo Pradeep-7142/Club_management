@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
-import { Users, Calendar, Trophy, AlertCircle } from 'lucide-react';
+import { Users, Calendar, AlertCircle, Building2 } from 'lucide-react';
 import { api } from '../../lib/api';
-import { Event } from '../../lib/types';
+import { Event, Club } from '../../lib/types';
 import {
   BarChart,
   Bar,
@@ -15,8 +15,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
 } from 'recharts';
 
 export default function AdminDashboardPage() {
@@ -24,29 +22,35 @@ export default function AdminDashboardPage() {
   const [totalClubs, setTotalClubs] = useState(0);
   const [totalEvents, setTotalEvents] = useState(0);
   const [pendingApprovals, setPendingApprovals] = useState(0);
-  const [yearlyData, setYearlyData] = useState<any>(null);
+  const [clubEventsData, setClubEventsData] = useState<{ name: string; events: number; members: number }[]>([]);
 
   useEffect(() => {
     Promise.all([
       api.getUsers(),
       api.getClubs(),
       api.getEvents(),
-      api.getYearlyReport(2026),
-    ]).then(([users, clubs, events, report]) => {
+    ]).then(([users, clubs, events]: [any[], Club[], Event[]]) => {
       setTotalUsers(users.length);
       setTotalClubs(clubs.length);
       setTotalEvents(events.length);
       setPendingApprovals(events.filter(e => e.status === 'pending').length);
-      setYearlyData(report);
+
+      // Build club activity data
+      const data = clubs.map(club => ({
+        name: club.name.length > 15 ? club.name.slice(0, 15) + '...' : club.name,
+        events: events.filter(e => e.clubId === club.id).length,
+        members: club.memberCount || 0,
+      }));
+      setClubEventsData(data);
     });
   }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="mb-2">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
         <p className="text-muted-foreground">
-          Manage and monitor the student club management system
+          Platform overview, event approvals, and club administration.
         </p>
       </div>
 
@@ -59,18 +63,18 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalUsers}</div>
-            <p className="text-xs text-muted-foreground">Registered students</p>
+            <p className="text-xs text-muted-foreground">Registered campus users</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Clubs</CardTitle>
-            <Trophy className="h-4 w-4 text-muted-foreground" />
+            <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalClubs}</div>
-            <p className="text-xs text-muted-foreground">Active clubs</p>
+            <p className="text-xs text-muted-foreground">Active student clubs</p>
           </CardContent>
         </Card>
 
@@ -81,95 +85,91 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalEvents}</div>
-            <p className="text-xs text-muted-foreground">All time events</p>
+            <p className="text-xs text-muted-foreground">Organized events</p>
           </CardContent>
         </Card>
 
-        <Card className="border-amber-500 bg-amber-50">
+        <Card className={pendingApprovals > 0 ? "border-amber-500 bg-amber-50/50" : ""}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
-            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <AlertCircle className={`h-4 w-4 ${pendingApprovals > 0 ? 'text-amber-600' : 'text-muted-foreground'}`} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-amber-600">{pendingApprovals}</div>
-            <p className="text-xs text-amber-700">Requires attention</p>
+            <div className={`text-2xl font-bold ${pendingApprovals > 0 ? 'text-amber-600' : ''}`}>{pendingApprovals}</div>
+            <p className="text-xs text-muted-foreground">{pendingApprovals > 0 ? 'Requires Dean/Admin review' : 'All events reviewed'}</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Quick Actions */}
-      <div className="mb-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Button asChild variant="outline" className="h-auto flex-col items-start p-6">
+      <div className="mb-8 grid gap-6 md:grid-cols-3">
+        <Button asChild variant="outline" className="h-auto flex-col items-start p-6 hover:border-primary">
           <Link to="/admin/event-approval">
-            <AlertCircle className="mb-2 h-8 w-8" />
-            <span className="font-semibold">Event Approval</span>
-            <span className="text-xs text-muted-foreground">Review pending events</span>
+            <AlertCircle className="mb-2 h-8 w-8 text-amber-600" />
+            <span className="font-semibold text-base">Event Approval</span>
+            <span className="text-xs text-muted-foreground">Review and approve submitted club events</span>
           </Link>
         </Button>
 
-        <Button asChild variant="outline" className="h-auto flex-col items-start p-6">
+        <Button asChild variant="outline" className="h-auto flex-col items-start p-6 hover:border-primary">
           <Link to="/admin/manage-clubs">
-            <Trophy className="mb-2 h-8 w-8" />
-            <span className="font-semibold">Manage Clubs</span>
-            <span className="text-xs text-muted-foreground">Add or edit clubs</span>
+            <Building2 className="mb-2 h-8 w-8 text-primary" />
+            <span className="font-semibold text-base">Manage Clubs</span>
+            <span className="text-xs text-muted-foreground">Create, edit, or assign club leadership</span>
           </Link>
         </Button>
 
-        <Button asChild variant="outline" className="h-auto flex-col items-start p-6">
+        <Button asChild variant="outline" className="h-auto flex-col items-start p-6 hover:border-primary">
           <Link to="/admin/manage-users">
-            <Users className="mb-2 h-8 w-8" />
-            <span className="font-semibold">Manage Users</span>
-            <span className="text-xs text-muted-foreground">View and edit users</span>
-          </Link>
-        </Button>
-
-        <Button asChild variant="outline" className="h-auto flex-col items-start p-6">
-          <Link to="/admin/reports">
-            <Calendar className="mb-2 h-8 w-8" />
-            <span className="font-semibold">Reports</span>
-            <span className="text-xs text-muted-foreground">View analytics</span>
+            <Users className="mb-2 h-8 w-8 text-primary" />
+            <span className="font-semibold text-base">Manage Users</span>
+            <span className="text-xs text-muted-foreground">Assign roles (Admin, Club Head, Student)</span>
           </Link>
         </Button>
       </div>
 
-      {/* Charts */}
+      {/* Analytics Charts */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Events Per Month (2026)</CardTitle>
-            <CardDescription>Monthly event activity throughout the year</CardDescription>
+            <CardTitle>Events by Club</CardTitle>
+            <CardDescription>Number of events organized across campus clubs</CardDescription>
           </CardHeader>
           <CardContent>
-            {yearlyData && (
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={yearlyData.monthlyData}>
+            {clubEventsData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={clubEventsData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis allowDecimals={false} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="events" stroke="hsl(var(--primary))" strokeWidth={2} />
-                </LineChart>
+                  <Bar dataKey="events" name="Total Events" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                </BarChart>
               </ResponsiveContainer>
+            ) : (
+              <p className="py-8 text-center text-sm text-muted-foreground">No data available.</p>
             )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Club Activity</CardTitle>
-            <CardDescription>Event distribution by month</CardDescription>
+            <CardTitle>Club Membership Distribution</CardTitle>
+            <CardDescription>Enrolled student members per organization</CardDescription>
           </CardHeader>
           <CardContent>
-            {yearlyData && (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={yearlyData.monthlyData}>
+            {clubEventsData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={clubEventsData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis allowDecimals={false} />
                   <Tooltip />
-                  <Bar dataKey="events" fill="hsl(var(--primary))" />
+                  <Bar dataKey="members" name="Members" fill="#10b981" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            ) : (
+              <p className="py-8 text-center text-sm text-muted-foreground">No data available.</p>
             )}
           </CardContent>
         </Card>

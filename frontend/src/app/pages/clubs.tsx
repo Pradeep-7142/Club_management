@@ -53,9 +53,9 @@ export default function ClubsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="mb-2">Student Clubs</h1>
+        <h1 className="text-3xl font-bold mb-2">Student Clubs</h1>
         <p className="text-muted-foreground">
-          Discover and join clubs that match your interests
+          Discover and join student organizations across campus.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export default function ClubsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search clubs..."
+            placeholder="Search clubs by name or keywords..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -95,26 +95,22 @@ export default function ClubsPage() {
           {filteredClubs.map(club => (
             <Card
               key={club.id}
-              className="flex h-full flex-col hover:shadow-lg transition-shadow"
+              className="flex h-full flex-col justify-between hover:shadow-lg transition-shadow"
             >
-              <CardHeader className="flex-1">
+              <CardHeader>
                 <div className="mb-3 flex items-start justify-between">
                   <Badge variant="secondary">{club.category}</Badge>
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Users className="h-4 w-4" />
-                    {club.memberCount}
+                    <span>{club.memberCount} members</span>
                   </div>
                 </div>
-                <CardTitle>{club.name}</CardTitle>
+                <CardTitle className="text-xl">{club.name}</CardTitle>
                 <CardDescription className="line-clamp-3">
                   {club.description}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="mb-4 flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Leaderboard Points</span>
-                  <span className="font-semibold text-primary">{club.points}</span>
-                </div>
                 <Button asChild className="w-full">
                   <Link to={`/clubs/${club.id}`}>View Details</Link>
                 </Button>
